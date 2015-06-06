@@ -1,6 +1,7 @@
 #include "pebble.h"
 
 #define PERSONALIZED_TEXT_INPUT 0
+#define DATE_STYLE 1  
 
 Window      *window;
 
@@ -33,11 +34,21 @@ static int  batterycharging = 0;
 
 static char personalized_text[20] = "Enter Data";
 
-GSize callsize;
-
 GPoint     Linepoint;
 static int BTConnected = 1;
 static int BTVibesDone = 0;
+
+static int FirstTime = 0;
+static int SecsInt = 0;
+
+
+static char date_type[]="us  ";
+static char date_text[] = "Xxx 00       0000";
+static char dayname_text[] = "XXXXXXXXXX";
+static char time_text[] = "00:00";
+static char seconds_text[00];
+
+static char date_format[]="%b %e, %Y";
 
 GColor TextColorHold;
 GColor BGColorHold;
@@ -173,7 +184,6 @@ void handle_battery(BatteryChargeState charge_state) {
 }
 
 void line_layer_update_callback(Layer *LineLayer, GContext* ctx) {
-
      graphics_context_set_fill_color(ctx, TextColorHold);
      graphics_fill_rect(ctx, layer_get_bounds(LineLayer), 3, GCornersAll);
 
@@ -256,67 +266,90 @@ void fill_in_personalized_text() {
   text_layer_set_text_color(text_personalized_layer, TextColorHold);
   text_layer_set_background_color(text_personalized_layer, BGColorHold);
   layer_add_child(window_layer, text_layer_get_layer(text_personalized_layer));
-}
+}  
 
-//       ******************** Main Loop *******************
+//       ******************** Main Loop **************************************************************
 
 void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
+  strftime(seconds_text, sizeof(seconds_text), "%S", tick_time);
+  SecsInt = atoi(seconds_text);
+  
+  if(SecsInt == 0) {
+     char *time_format;
 
-  // Need to be static because they're used by the system later.
-  static char dayname_text[] = "XXXXXXXXXX";
-  static char time_text[] = "00:00";
-  static char date_text[] = "Xxx 00       0000";
+     if (clock_is_24h_style()) {
+       time_format = "%R";
+     } else {
+       time_format = "%I:%M";
+     }
 
-  int FirstTime = 0;
+     // Set Time of Day
+     strftime(time_text, sizeof(time_text), time_format, tick_time);
 
-  char *time_format;
+     // Kludge to handle lack of non-padded hour format string
+     // for twelve hour clock.
+     if (!clock_is_24h_style() && (time_text[0] == '0')) {
+       memmove(time_text, &time_text[1], sizeof(time_text) - 1);
+     }
 
-  if (clock_is_24h_style()) {
-    time_format = "%R";
-  } else {
-    time_format = "%I:%M";
-  }
+     // Set day & date
+     strftime(dayname_text, sizeof(dayname_text), "%A", tick_time);
+     strftime(date_text,    sizeof(date_text), date_format, tick_time);
+    
+     if (FirstTime == 0) {
+       text_layer_set_text(text_dayname_layer, dayname_text);
+       text_layer_set_text(text_date_layer, date_text);
+       FirstTime = 1; 
+     }
+  
+     if (units_changed & DAY_UNIT) {
+       // Only update the day name & date when it's changed.
+       text_layer_set_text(text_dayname_layer, dayname_text);
+       text_layer_set_text(text_date_layer, date_text);
+     } 
 
-  // Set Time of Day
-  strftime(time_text, sizeof(time_text), time_format, tick_time);
-
-  // Kludge to handle lack of non-padded hour format string
-  // for twelve hour clock.
-  if (!clock_is_24h_style() && (time_text[0] == '0')) {
-    memmove(time_text, &time_text[1], sizeof(time_text) - 1);
-  }
-
-  // Set day and date
-  strftime(dayname_text, sizeof(dayname_text), "%A",        tick_time);
-  strftime(date_text,    sizeof(date_text),    "%b %e, %Y" , tick_time);
-
-  //Initialize
-  if (FirstTime == 0) {
-    text_layer_set_text(text_dayname_layer, dayname_text);
-    text_layer_set_text(text_date_layer, date_text);
-    FirstTime = 1;
-    }
-
-  if (units_changed & DAY_UNIT) {
-   // Only update the day name & date when it's changed.
-    text_layer_set_text(text_dayname_layer, dayname_text);
-    text_layer_set_text(text_date_layer, date_text);
-  }
-
-  //Always set time  *****************************************************
-  text_layer_set_text(text_time_layer, time_text);
+     //Always set time  *****************************************************
+     text_layer_set_text(text_time_layer, time_text);   
+  }  
 }
 
-//Receive Personalized Text * * *
+//Receive Input from Config html page:
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-   APP_LOG(APP_LOG_LEVEL_INFO, "Inbox received callback");
-
-  // Read Call
+  APP_LOG(APP_LOG_LEVEL_INFO, "In Inbox received callback");
+    
+  // Read first item
   Tuple *t = dict_read_first(iterator);
 
-  strcpy(personalized_text, (t->value->cstring));
+  // For all items
+  while(t != NULL) {
+    
+    // Which key was received?
+    switch(t->key) {
+    case 0:      
+      strcpy(personalized_text, (t->value->cstring));
+      fill_in_personalized_text();
+      break;
+      
+    case 1:
+      strcpy(date_type, t->value->cstring); 
+      
+      if (strcmp(date_type, "us") == 0) {
+         strcpy(date_format, "%b %e, %Y");
+      } else {
+         strcpy(date_format, "%e %b %Y");
+      }
+      text_layer_set_text(text_date_layer, date_text);
+      text_layer_set_text(text_date_layer, date_text);
+      break;
+      
+    default:
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
+      break;
+    }
 
-  fill_in_personalized_text();
+    // Look for next item
+    t = dict_read_next(iterator);
+  }  
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -333,6 +366,7 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 
 void handle_deinit(void) {
   persist_write_string(PERSONALIZED_TEXT_INPUT, personalized_text);
+  persist_write_string(DATE_STYLE, date_type);
 
   tick_timer_service_unsubscribe();
   battery_state_service_unsubscribe();
@@ -411,7 +445,7 @@ void handle_init(void) {
   text_layer_set_background_color(text_date_layer, BGCOLOR);
   layer_add_child(window_layer, text_layer_get_layer(text_date_layer));
 
-  // Ham Call
+  // Persistant value Text:
   if(persist_exists(PERSONALIZED_TEXT_INPUT)) {
      persist_read_string(PERSONALIZED_TEXT_INPUT, personalized_text, sizeof(personalized_text));
   } else {
@@ -420,6 +454,15 @@ void handle_init(void) {
 
   fill_in_personalized_text();
 
+  //Persistent Value Date Format:
+  if (persist_exists(DATE_STYLE)) {
+     persist_read_string(DATE_STYLE, date_type, sizeof(date_type));  
+     APP_LOG(APP_LOG_LEVEL_WARNING, "persistent exists");
+     APP_LOG(APP_LOG_LEVEL_WARNING, date_type);
+  }  else {
+     strcpy(date_type, "us");
+  }
+  
   // Time of Day
   text_time_layer = text_layer_create(GRect(1, 116, 144, 168-116));
   text_layer_set_text_alignment(text_time_layer, GTextAlignmentCenter);
@@ -434,7 +477,7 @@ void handle_init(void) {
   layer_set_update_proc(LineLayer, line_layer_update_callback);
   layer_add_child(window_layer, LineLayer);
 
-  tick_timer_service_subscribe(MINUTE_UNIT, handle_tick);
+  tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
 
   //Bluetooth Logo Setup area
   GRect BTArea = GRect(1, 5, 20, 20);
