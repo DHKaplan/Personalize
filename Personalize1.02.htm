@@ -8,16 +8,8 @@
     <script src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
     <script src="http://code.jquery.com/mobile/1.3.2/jquery.mobile-1.3.2.min.js"></script>
 
-    <script>
-    function getStorage(){
-      if(typedefof(Storage) !== "undefined"){
-      savedvalue=localStorage.getItem('personalized_text',options.personalized_text);
-        }
-      }
-    </script>
 
   </head>
-
   <body>
      <!--<div data-role="page" id="main">
        <h1>Personalize!</h>
@@ -28,6 +20,17 @@
          <div data-role="fieldcontain">
           <label for="personalized_text">Enter Text: <br>(11 Char. Max)</label>
           <textarea maxlength="11" type="text" name="personalized_text" id="personalized_text" rows="2"></textarea>
+
+          <script>
+            //Setup for Saved Text:
+            if(localStorage.getItem("savedText")) {
+              var displayText = localStorage.getItem('savedText');
+              document.getElementById('personalized_text').value = displayText;
+            } else {
+              document.getElementById("personalized_text").value = "Enter Text...";
+            }
+          </script>
+
          </div>
 
          <div class="ui-grid-solo">
@@ -37,6 +40,20 @@
 
                  <div class="ui-radio"><label for="date_style_0" style="border-top-right-radius:8px" class="ui-btn ui-corner-all ui-btn-inherit ui-btn-icon-left ui-first-child ui-radio-off">May 8, 2015</label><input type="radio" name="date_style" id="date_style_0" value="0"  checked data-cacheval="false"></div>
                   <div class="ui-radio"><label for="date_style_1" class="ui-btn ui-corner-all ui-btn-inherit ui-btn-icon-left ui-radio-off">8 May 2015</label><input type="radio" name="date_style" id="date_style_1" value="1" data-cacheval="false"></div>
+
+                  <script>
+                    //Setup for Saved Date value:
+                    if(localStorage.getItem("savedDateType")) {
+                         var DateValue = localStorage.getItem('savedDateType');
+                         if (DateValue == 0) {
+                            document.getElementById("date_style_0").checked = 1;
+                         } else { //Must be 1
+                            document.getElementById("date_style_1").checked= 1;
+                         }
+                    } else { //Default to 0
+                         document.getElementById("date_style_0").checked = 1;
+                    }
+                  </script>
 
  							</div></fieldset>
  					</div>
@@ -91,9 +108,19 @@
        });
 
        $("#b-submit").click(function() {
+       var savedText = document.getElementById('personalized_text').value;
+       localStorage.setItem('savedText', savedText);
 
-        var return_to = getQueryParam('return_to', 'pebblejs://close#');
-        document.location = return_to + encodeURIComponent(JSON.stringify(saveOptions()));
+       if (document.getElementById("date_style_0").checked == 1) {
+          var savedDate = 0;
+       } else {
+          var savedDate = 1;
+       }
+       localStorage.setItem('savedDateType', savedDate);
+
+
+       var return_to = getQueryParam('return_to', 'pebblejs://close#');
+       document.location = return_to + encodeURIComponent(JSON.stringify(saveOptions()));
 
        });
      });
