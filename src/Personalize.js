@@ -1,6 +1,6 @@
 Pebble.addEventListener('showConfiguration', function(e) {
   // Show config page
-  Pebble.openURL('http://www.wticalumni.com/DHK/Personalize1.02.htm');
+  Pebble.openURL('http://www.wticalumni.com/DHK/Personalize2.00.htm');
 });
 
 
