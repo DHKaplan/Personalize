@@ -39,14 +39,12 @@ static int BTConnected = 1;
 static int BTVibesDone = 0;
 
 static int FirstTime = 0;
-static int SecsInt = 0;
-
 
 static char date_type[]="us  ";
 static char date_text[] = "Xxx 00       0000";
 static char dayname_text[] = "XXXXXXXXXX";
 static char time_text[] = "00:00";
-static char seconds_text[00];
+static char seconds_text[] = "00";
 
 static char date_format[]="%b %e, %Y";
 
@@ -271,21 +269,22 @@ void fill_in_personalized_text() {
 //       ******************** Main Loop **************************************************************
 
 void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
-  strftime(seconds_text, sizeof(seconds_text), "%S", tick_time);
-  SecsInt = atoi(seconds_text);
-  
-  if(SecsInt == 0) {
-     char *time_format;
+  char time_format[] = "%I:%M";
 
-     if (clock_is_24h_style()) {
-       time_format = "%R";
+  strftime(seconds_text, sizeof(seconds_text), "%S", tick_time);
+   
+  if (clock_is_24h_style()) {
+       strcpy(time_format,"%R");
      } else {
-       time_format = "%I:%M";
-     }
+       strcpy(time_format,"%I:%M");
+     }  
+  
+  strftime(time_text, sizeof(time_text), time_format, tick_time);
+
+  if((strcmp(seconds_text,"00") == 0) || (FirstTime == 0)) {
+     FirstTime = 1; 
 
      // Set Time of Day
-     strftime(time_text, sizeof(time_text), time_format, tick_time);
-
      // Kludge to handle lack of non-padded hour format string
      // for twelve hour clock.
      if (!clock_is_24h_style() && (time_text[0] == '0')) {
@@ -294,13 +293,11 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 
      // Set day & date
      strftime(dayname_text, sizeof(dayname_text), "%A", tick_time);
+     
      strftime(date_text,    sizeof(date_text), date_format, tick_time);
     
-     if (FirstTime == 0) {
        text_layer_set_text(text_dayname_layer, dayname_text);
        text_layer_set_text(text_date_layer, date_text);
-       FirstTime = 1; 
-     }
   
      if (units_changed & DAY_UNIT) {
        // Only update the day name & date when it's changed.
@@ -315,8 +312,10 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 
 //Receive Input from Config html page:
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "In Inbox received callback");
-    
+  //APP_LOG(APP_LOG_LEVEL_INFO, "In Inbox received callback");
+  
+  FirstTime = 0;
+  
   // Read first item
   Tuple *t = dict_read_first(iterator);
 
@@ -343,7 +342,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       break;
       
     default:
-      APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
+      //APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
       break;
     }
 
@@ -353,19 +352,21 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Inbox Message dropped!");
+  //APP_LOG(APP_LOG_LEVEL_ERROR, "Inbox Message dropped!");
 }
 
 static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
-  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+  //APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
 }
 
 static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
-  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
+  //APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
 void handle_deinit(void) {
   persist_write_string(PERSONALIZED_TEXT_INPUT, personalized_text);
+  //APP_LOG(APP_LOG_LEVEL_WARNING, "In DeInit - Date Type: %s", date_type);
+
   persist_write_string(DATE_STYLE, date_type);
 
   tick_timer_service_unsubscribe();
@@ -457,11 +458,19 @@ void handle_init(void) {
   //Persistent Value Date Format:
   if (persist_exists(DATE_STYLE)) {
      persist_read_string(DATE_STYLE, date_type, sizeof(date_type));  
-     APP_LOG(APP_LOG_LEVEL_WARNING, "persistent exists");
-     APP_LOG(APP_LOG_LEVEL_WARNING, date_type);
+     //APP_LOG(APP_LOG_LEVEL_WARNING, "In Init: Persistent Exists - Date Type: %s", date_type);
   }  else {
+     //APP_LOG(APP_LOG_LEVEL_WARNING, "In Init: No Persistent-Setting us default");
      strcpy(date_type, "us");
-  }
+  } 
+    
+  if (strcmp(date_type, "us") == 0) {
+       //APP_LOG(APP_LOG_LEVEL_WARNING, "In Init: Setting Date Type: %s", date_type);
+         strcpy(date_format, "%b %e, %Y");
+    } else {
+         //APP_LOG(APP_LOG_LEVEL_WARNING, "In Init: Setting Date Type: %s", date_type);
+         strcpy(date_format, "%e %b %Y");
+    }
   
   // Time of Day
   text_time_layer = text_layer_create(GRect(1, 116, 144, 168-116));
