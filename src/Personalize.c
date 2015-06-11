@@ -286,33 +286,30 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   
   strftime(time_text, sizeof(time_text), time_format, tick_time);
 
-  if((strcmp(seconds_text,"00") == 0) || (FirstTime == 0)) {
-     FirstTime = 1; 
-
-     // Set Time of Day
-     // Kludge to handle lack of non-padded hour format string
-     // for twelve hour clock.
-     if (!clock_is_24h_style() && (time_text[0] == '0')) {
+  // Kludge to handle lack of non-padded hour format string
+  // for twelve hour clock.
+  if (!clock_is_24h_style() && (time_text[0] == '0')) {
        memmove(time_text, &time_text[1], sizeof(time_text) - 1);
-     }
-
+  }
+  
+  if((strcmp(seconds_text,"00") == 0) || (FirstTime == 0)) {
      // Set day & date
      strftime(dayname_text, sizeof(dayname_text), "%A", tick_time);
-     
      strftime(date_text,    sizeof(date_text), date_format, tick_time);
     
-       text_layer_set_text(text_dayname_layer, dayname_text);
-       text_layer_set_text(text_date_layer, date_text);
+     text_layer_set_text(text_dayname_layer, dayname_text);
+     text_layer_set_text(text_date_layer, date_text);
+  }
   
-     if (units_changed & DAY_UNIT) {
-       // Only update the day name & date when it's changed.
-       text_layer_set_text(text_dayname_layer, dayname_text);
-       text_layer_set_text(text_date_layer, date_text);
-     } 
+  // Only update the day name & date when it's changed.
+  if (units_changed & DAY_UNIT) {
+     text_layer_set_text(text_dayname_layer, dayname_text);
+     text_layer_set_text(text_date_layer, date_text);
+  } 
 
      //Always set time  *****************************************************
      text_layer_set_text(text_time_layer, time_text);   
-  }  
+     FirstTime = 1; 
 }
 
 //Receive Input from Config html page:
