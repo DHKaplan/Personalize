@@ -83,7 +83,12 @@ void BTLine_update_callback(Layer *BTLayer, GContext* BT1ctx) {
             graphics_context_set_stroke_color(BT1ctx, GColorRed);
             graphics_context_set_fill_color(BT1ctx, GColorWhite);
             graphics_fill_rect(BT1ctx, layer_get_bounds(BTLayer), 0, GCornerNone);
+        #else
+           graphics_context_set_stroke_color(BT1ctx, GColorBlack);
+           graphics_context_set_fill_color(BT1ctx, GColorWhite);
+           graphics_fill_rect(BT1ctx, layer_get_bounds(BTLayer), 0, GCornerNone);
         #endif
+        
 
         // "X"" Line 1
         BTLinePointStart.x = 1;
@@ -337,7 +342,6 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       } else {
          strcpy(date_format, "%e %b %Y");
       }
-      text_layer_set_text(text_date_layer, date_text);
       text_layer_set_text(text_date_layer, date_text);
       break;
       
