@@ -53,7 +53,6 @@ GColor BGColorHold;
 
 void handle_bluetooth(bool connected) {
     if (connected) {
-
          BTConnected = 1;     // Connected
          BTVibesDone = 0;
 
@@ -68,7 +67,6 @@ void handle_bluetooth(bool connected) {
     }
     layer_mark_dirty(BTLayer);
 }
-
 //BT Logo Callback;
 void BTLine_update_callback(Layer *BTLayer, GContext* BT1ctx) {
 
@@ -78,7 +76,6 @@ void BTLine_update_callback(Layer *BTLayer, GContext* BT1ctx) {
        graphics_context_set_stroke_color(BT1ctx, TextColorHold);
 
       if (BTConnected == 0) {
-
         #ifdef PBL_COLOR
             graphics_context_set_stroke_color(BT1ctx, GColorRed);
             graphics_context_set_fill_color(BT1ctx, GColorWhite);
@@ -498,6 +495,8 @@ void handle_init(void) {
   layer_set_update_proc(BTLayer, BTLine_update_callback);
 
   bluetooth_connection_service_subscribe(&handle_bluetooth);
+  handle_bluetooth(bluetooth_connection_service_peek());
+
 
   // Battery Text Setup
   text_battery_layer = text_layer_create(GRect(85,2,55,30));
