@@ -2,6 +2,7 @@
 
 #define PERSONALIZED_TEXT_INPUT 0
 #define DATE_STYLE 1  
+#define BT_VIBRATE 2  
 
 Window      *window;
 
@@ -37,6 +38,7 @@ static char personalized_text[20] = "Enter Data";
 GPoint     Linepoint;
 static int BTConnected = 1;
 static int BTVibesDone = 0;
+static char VibOnBTLoss[] = "0"; //From Config Page
 
 static int FirstTime = 0;
 
@@ -52,21 +54,21 @@ GColor TextColorHold;
 GColor BGColorHold;
 
 void handle_bluetooth(bool connected) {
-    if (connected) {
+     if (connected) {
          BTConnected = 1;     // Connected
          BTVibesDone = 0;
 
     } else {
          BTConnected = 0;      // Not Connected
 
-         if (BTVibesDone == 0) {    //Do First Vibe
+         if ((BTVibesDone == 0) && (strcmp(VibOnBTLoss,"0") == 0)) {    
              BTVibesDone = 1;
-
              vibes_long_pulse();
          }
     }
     layer_mark_dirty(BTLayer);
 }
+
 //BT Logo Callback;
 void BTLine_update_callback(Layer *BTLayer, GContext* BT1ctx) {
 
@@ -313,6 +315,8 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
 static void inbox_received_callback(DictionaryIterator *iterator, void *context) {
   //APP_LOG(APP_LOG_LEVEL_INFO, "In Inbox received callback");
   
+  char BTVibeConfig[] = "0";
+    ;
   FirstTime = 0;
   
   // Read first item
@@ -339,8 +343,17 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
       text_layer_set_text(text_date_layer, date_text);
       break;
       
+      case 2:
+      strcpy(BTVibeConfig, t->value->cstring); 
+      if (strcmp(BTVibeConfig, "0") == 0) {
+         strcpy(VibOnBTLoss,"0");
+      } else {
+         strcpy(VibOnBTLoss,"1");
+      }
+      break;
+
     default:
-      //APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
+      APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
       break;
     }
 
@@ -366,6 +379,8 @@ void handle_deinit(void) {
   //APP_LOG(APP_LOG_LEVEL_WARNING, "In DeInit - Date Type: %s", date_type);
 
   persist_write_string(DATE_STYLE, date_type);
+  
+  persist_write_string(BT_VIBRATE, VibOnBTLoss);
 
   tick_timer_service_unsubscribe();
   battery_state_service_unsubscribe();
@@ -448,7 +463,7 @@ void handle_init(void) {
   if(persist_exists(PERSONALIZED_TEXT_INPUT)) {
      persist_read_string(PERSONALIZED_TEXT_INPUT, personalized_text, sizeof(personalized_text));
   } else {
-    strncpy(personalized_text, "Enter Text", sizeof(personalized_text));
+    strncpy(personalized_text, "Enter Text", sizeof(personalized_text)); //Default
   }
 
   fill_in_personalized_text();
@@ -459,16 +474,23 @@ void handle_init(void) {
      //APP_LOG(APP_LOG_LEVEL_WARNING, "In Init: Persistent Exists - Date Type: %s", date_type);
   }  else {
      //APP_LOG(APP_LOG_LEVEL_WARNING, "In Init: No Persistent-Setting us default");
-     strcpy(date_type, "us");
+     strcpy(date_type, "us"); //Default
   } 
     
   if (strcmp(date_type, "us") == 0) {
        //APP_LOG(APP_LOG_LEVEL_WARNING, "In Init: Setting Date Type: %s", date_type);
          strcpy(date_format, "%b %e, %Y");
-    } else {
+  } else {
          //APP_LOG(APP_LOG_LEVEL_WARNING, "In Init: Setting Date Type: %s", date_type);
          strcpy(date_format, "%e %b %Y");
-    }
+  }
+  
+  //Persistent Value VibOnBTLoss
+  if(persist_exists(BT_VIBRATE)) {
+     persist_read_string(BT_VIBRATE, VibOnBTLoss, sizeof(VibOnBTLoss));  
+  }  else {
+     strcpy(VibOnBTLoss, "0"); // Default
+  } 
   
   // Time of Day
   text_time_layer = text_layer_create(GRect(1, 116, 144, 168-116));

@@ -9,28 +9,14 @@
     "resources": {
         "media": [
             {
-                "file": "fonts/HelveNeuLig.ttf",
-                "name": "FONT_HELV_NEW_LIGHT_20",
-                "type": "font"
+                "file": "images/Personalize_Menu_Icon_BW.png",
+                "menuIcon": true,
+                "name": "IMAGE_MENU_ICON",
+                "type": "png"
             },
             {
                 "file": "fonts/monaco.ttf",
-                "name": "FONT_MONACO_19",
-                "type": "font"
-            },
-            {
-                "file": "fonts/monaco.ttf",
-                "name": "FONT_MONACO_22",
-                "type": "font"
-            },
-            {
-                "file": "fonts/monaco.ttf",
-                "name": "FONT_MONACO_24",
-                "type": "font"
-            },
-            {
-                "file": "fonts/monaco.ttf",
-                "name": "FONT_MONACO_26",
+                "name": "FONT_MONACO_37",
                 "type": "font"
             },
             {
@@ -40,14 +26,28 @@
             },
             {
                 "file": "fonts/monaco.ttf",
-                "name": "FONT_MONACO_37",
+                "name": "FONT_MONACO_26",
                 "type": "font"
             },
             {
-                "file": "images/Personalize_Menu_Icon_BW.png",
-                "menuIcon": true,
-                "name": "IMAGE_MENU_ICON",
-                "type": "png"
+                "file": "fonts/monaco.ttf",
+                "name": "FONT_MONACO_24",
+                "type": "font"
+            },
+            {
+                "file": "fonts/monaco.ttf",
+                "name": "FONT_MONACO_22",
+                "type": "font"
+            },
+            {
+                "file": "fonts/monaco.ttf",
+                "name": "FONT_MONACO_19",
+                "type": "font"
+            },
+            {
+                "file": "fonts/HelveNeuLig.ttf",
+                "name": "FONT_HELV_NEW_LIGHT_20",
+                "type": "font"
             }
         ]
     },
@@ -58,7 +58,7 @@
         "basalt"
     ],
     "uuid": "98139D10-3692-4187-B03E-FA498B00B364",
-    "versionLabel": "2.01",
+    "versionLabel": "2.10",
     "watchapp": {
         "watchface": true
     }
