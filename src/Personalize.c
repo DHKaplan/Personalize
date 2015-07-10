@@ -307,8 +307,15 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   } 
 
      //Always set time  *****************************************************
-     text_layer_set_text(text_time_layer, time_text);   
-     FirstTime = 1; 
+  static char timeit[]="00:00:00";
+  strftime(timeit, sizeof(timeit), "%I:%M:%S", tick_time);
+  
+  
+  if((strcmp(seconds_text,"00") == 0) || (FirstTime == 0)) {
+     text_layer_set_text(text_time_layer, time_text); 
+  }  
+  
+  FirstTime = 1; 
 }
 
 //Receive Input from Config html page:
