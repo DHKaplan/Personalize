@@ -2,7 +2,8 @@
 
 #define PERSONALIZED_TEXT_INPUT 0
 #define DATE_STYLE 1  
-#define BT_VIBRATE 2  
+#define BT_VIBRATE 2 
+#define BGCOLORVALUE 3
 
 Window      *window;
 
@@ -33,16 +34,18 @@ static int  batterychargepct;
 static int  BatteryVibesDone = 0;
 static int  batterycharging = 0;
 
-static char personalized_text[20] = "Enter Data";
-
 GPoint     Linepoint;
 static int BTConnected = 1;
 static int BTVibesDone = 0;
-static char VibOnBTLoss[] = "0"; //From Config Page
+
+static char personalized_text[20] = "Enter Data"; //From Config Page
+static char date_type[]="us  ";                   //From Config Page
+static char VibOnBTLoss[] = "0";                  //From Config Page
+static char BGColorConfig[] = "0";                //From Config Page
 
 static int FirstTime = 0;
 
-static char date_type[]="us  ";
+
 static char date_text[] = "Xxx 00       0000";
 static char dayname_text[] = "XXXXXXXXXX";
 static char time_text[] = "00:00";
@@ -75,19 +78,30 @@ void BTLine_update_callback(Layer *BTLayer, GContext* BT1ctx) {
        GPoint BTLinePointStart;
        GPoint BTLinePointEnd;
 
-       graphics_context_set_stroke_color(BT1ctx, TextColorHold);
+       graphics_context_set_stroke_color(BT1ctx, GColorWhite);
 
-      if (BTConnected == 0) {
+    #ifdef PBL_COLOR
+       if (strcmp(BGColorConfig, "0") == 0) {
+           graphics_context_set_fill_color(BT1ctx, GColorMidnightGreen); 
+       }
+      
+       if (strcmp(BGColorConfig, "1") == 0) {
+           graphics_context_set_fill_color(BT1ctx, GColorDukeBlue);
+       }  
+    #else
+      window_set_background_color(window, GColorBlack);
+    #endif  
+  
+    if (BTConnected == 0) {
+            graphics_context_set_fill_color(BT1ctx, GColorWhite);
+      
         #ifdef PBL_COLOR
             graphics_context_set_stroke_color(BT1ctx, GColorRed);
-            graphics_context_set_fill_color(BT1ctx, GColorWhite);
             graphics_fill_rect(BT1ctx, layer_get_bounds(BTLayer), 0, GCornerNone);
         #else
            graphics_context_set_stroke_color(BT1ctx, GColorBlack);
-           graphics_context_set_fill_color(BT1ctx, GColorWhite);
            graphics_fill_rect(BT1ctx, layer_get_bounds(BTLayer), 0, GCornerNone);
-        #endif
-        
+        #endif 
 
         // "X"" Line 1
         BTLinePointStart.x = 1;
@@ -224,8 +238,22 @@ void handle_appfocus(bool in_focus){
 void fill_in_personalized_text() {
  
   //Clear out area of largest text size for Bug fix V3.01:
-  text_personalized_layer = text_layer_create(GRect(1, 27, 144, 42));
-  text_layer_set_background_color(text_personalized_layer, BGColorHold);
+  text_personalized_layer = text_layer_create(GRect(1, 25, 144, 44));
+  
+   #ifdef PBL_COLOR
+    if (strcmp(BGColorConfig, "0") == 0) {
+        window_set_background_color(window, GColorMidnightGreen);
+        text_layer_set_background_color(text_personalized_layer, GColorMidnightGreen);
+    }
+      
+    if (strcmp(BGColorConfig, "1") == 0) {
+       window_set_background_color(window, GColorDukeBlue);
+       text_layer_set_background_color(text_personalized_layer, GColorDukeBlue);
+    }  
+    #else
+      window_set_background_color(window, GColorBlack);
+  #endif
+    
   layer_add_child(window_layer, text_layer_get_layer(text_personalized_layer));
 
   if (strlen(personalized_text) >  12) {       //Shouldn't happen, but error trapping...
@@ -239,34 +267,45 @@ void fill_in_personalized_text() {
       text_layer_set_font(text_personalized_layer, fontMonaco19);
 
     } else if (strlen(personalized_text) ==  11) {
-      text_personalized_layer = text_layer_create(GRect(1, 40, 144, 24));
+      text_personalized_layer = text_layer_create(GRect(1, 40, 144, 29));
       text_layer_set_font(text_personalized_layer, fontMonaco19);
 
     } else if (strlen(personalized_text) == 10) {
-      text_personalized_layer = text_layer_create(GRect(1,38, 144, 26));
+      text_personalized_layer = text_layer_create(GRect(1,38, 144, 31));
       text_layer_set_font(text_personalized_layer, fontMonaco22);
 
     } else if (strlen(personalized_text) == 9)  {
-      text_personalized_layer = text_layer_create(GRect(1, 36, 144, 28));
+      text_personalized_layer = text_layer_create(GRect(1, 36, 144, 33));
       text_layer_set_font(text_personalized_layer, fontMonaco24);
 
     } else if (strlen(personalized_text) == 8)  {
-      text_personalized_layer = text_layer_create(GRect(1, 34, 144, 32));
+      text_personalized_layer = text_layer_create(GRect(1, 34, 144, 35));
       text_layer_set_font(text_personalized_layer, fontMonaco26);
 
     } else if (strlen(personalized_text) ==  7) {
-      text_personalized_layer = text_layer_create(GRect(1, 34, 144, 38));
+      text_personalized_layer = text_layer_create(GRect(1, 32, 144, 35));
       text_layer_set_font(text_personalized_layer, fontMonaco30);
 
     } else  {  //6 or less
-      text_personalized_layer = text_layer_create(GRect(1, 27, 144, 42));
+      text_personalized_layer = text_layer_create(GRect(1, 25, 144, 44));
       text_layer_set_font(text_personalized_layer, fontMonaco37);
   }
 
+  #ifdef PBL_COLOR
+    if (strcmp(BGColorConfig, "0") == 0) {
+        text_layer_set_background_color(text_personalized_layer, GColorMidnightGreen);
+    }
+      
+    if (strcmp(BGColorConfig, "1") == 0) {
+       text_layer_set_background_color(text_personalized_layer, GColorDukeBlue);
+    }  
+    #else
+      window_set_background_color(window, GColorBlack);
+  #endif
+    
+  text_layer_set_text_color(text_personalized_layer, GColorWhite);
   text_layer_set_text_alignment(text_personalized_layer, GTextAlignmentCenter);
   text_layer_set_text(text_personalized_layer, personalized_text);
-  text_layer_set_text_color(text_personalized_layer, TextColorHold);
-  text_layer_set_background_color(text_personalized_layer, BGColorHold);
   layer_add_child(window_layer, text_layer_get_layer(text_personalized_layer));
 }  
 
@@ -312,6 +351,8 @@ void handle_tick(struct tm *tick_time, TimeUnits units_changed) {
   
   
   if((strcmp(seconds_text,"00") == 0) || (FirstTime == 0)) {
+    
+    
      text_layer_set_text(text_time_layer, time_text); 
   }  
   
@@ -323,7 +364,7 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
   //APP_LOG(APP_LOG_LEVEL_INFO, "In Inbox received callback");
   
   char BTVibeConfig[] = "0";
-    ;
+    
   FirstTime = 0;
   
   // Read first item
@@ -358,6 +399,10 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
          strcpy(VibOnBTLoss,"1");
       }
       break;
+      
+      case 3:
+      strcpy(BGColorConfig, t->value->cstring);  
+      break;
 
     default:
       APP_LOG(APP_LOG_LEVEL_ERROR, "Key %d not recognized!", (int)t->key);
@@ -367,6 +412,34 @@ static void inbox_received_callback(DictionaryIterator *iterator, void *context)
     // Look for next item
     t = dict_read_next(iterator);
   }  
+  
+  #ifdef PBL_COLOR
+    if (strcmp(BGColorConfig, "0") == 0) {
+        text_layer_set_background_color(text_battery_layer,  GColorMidnightGreen);
+        text_layer_set_background_color(text_time_layer, GColorMidnightGreen);
+        text_layer_set_background_color(text_dayname_layer, GColorMidnightGreen);
+        text_layer_set_background_color(text_date_layer, GColorMidnightGreen);
+        text_layer_set_background_color(text_personalized_layer, GColorMidnightGreen);
+        window_set_background_color(window, GColorMidnightGreen);
+    }
+      
+    if (strcmp(BGColorConfig, "1") == 0) {
+        text_layer_set_background_color(text_battery_layer,  GColorDukeBlue);
+        text_layer_set_background_color(text_time_layer, GColorDukeBlue);
+        text_layer_set_background_color(text_dayname_layer, GColorDukeBlue);
+        text_layer_set_background_color(text_date_layer, GColorDukeBlue);
+        text_layer_set_background_color(text_personalized_layer, GColorDukeBlue);
+        window_set_background_color(window, GColorDukeBlue);
+    }  
+    #else
+      window_set_background_color(window, GColorBlack);
+  #endif
+  
+    
+  fill_in_personalized_text();
+  
+  
+  FirstTime = 0;
 }
 
 static void inbox_dropped_callback(AppMessageResult reason, void *context) {
@@ -383,11 +456,12 @@ static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
 
 void handle_deinit(void) {
   persist_write_string(PERSONALIZED_TEXT_INPUT, personalized_text);
-  //APP_LOG(APP_LOG_LEVEL_WARNING, "In DeInit - Date Type: %s", date_type);
 
   persist_write_string(DATE_STYLE, date_type);
   
   persist_write_string(BT_VIBRATE, VibOnBTLoss);
+  
+  persist_write_string(BGCOLORVALUE, BGColorConfig);
 
   tick_timer_service_unsubscribe();
   battery_state_service_unsubscribe();
@@ -421,14 +495,15 @@ void handle_init(void) {
   //      DarkGreen BG, PastelYellow Text * * *
   //      ArmyGreen BG, PastelYellow Text
 
-  GColor BGCOLOR   = COLOR_FALLBACK(GColorMidnightGreen, GColorBlack);
-  BGColorHold = BGCOLOR;
-
-  GColor TEXTCOLOR = COLOR_FALLBACK(GColorWhite, GColorWhite);
-  TextColorHold = TEXTCOLOR;
-
   window = window_create();
-  window_set_background_color(window, BGCOLOR);
+  
+  //Persistent Value BGColorConfig
+  if(persist_exists(BGCOLORVALUE)) {
+     persist_read_string(BGCOLORVALUE, BGColorConfig, sizeof(BGColorConfig));  
+  }  else {
+     strcpy(BGColorConfig, "0"); // Default
+  } 
+  
   window_stack_push(window, true /* Animated */);
 
   fontHelvNewLight20 = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_HELV_NEW_LIGHT_20));
@@ -451,19 +526,17 @@ void handle_init(void) {
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
   // Dayname
-  text_dayname_layer = text_layer_create(GRect(1, 65, 144, 168-65));
+  text_dayname_layer = text_layer_create(GRect(1, 64, 144, 168-64));
   text_layer_set_text_alignment(text_dayname_layer, GTextAlignmentCenter);
   text_layer_set_font(text_dayname_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
-  text_layer_set_text_color(text_dayname_layer, TEXTCOLOR);
-  text_layer_set_background_color(text_dayname_layer, BGCOLOR);
+  text_layer_set_text_color(text_dayname_layer, GColorWhite);     
   layer_add_child(window_layer, text_layer_get_layer(text_dayname_layer));
 
   // Date
   text_date_layer = text_layer_create(GRect(8, 88, 144-8, 168-88));
   text_layer_set_text_alignment(text_date_layer, GTextAlignmentCenter);
   text_layer_set_font(text_date_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
-  text_layer_set_text_color(text_date_layer, TEXTCOLOR);
-  text_layer_set_background_color(text_date_layer, BGCOLOR);
+  text_layer_set_text_color(text_date_layer, GColorWhite);
   layer_add_child(window_layer, text_layer_get_layer(text_date_layer));
 
   // Persistant value Text:
@@ -472,8 +545,6 @@ void handle_init(void) {
   } else {
     strncpy(personalized_text, "Enter Text", sizeof(personalized_text)); //Default
   }
-
-  fill_in_personalized_text();
 
   //Persistent Value Date Format:
   if (persist_exists(DATE_STYLE)) {
@@ -503,8 +574,10 @@ void handle_init(void) {
   text_time_layer = text_layer_create(GRect(1, 116, 144, 168-116));
   text_layer_set_text_alignment(text_time_layer, GTextAlignmentCenter);
   text_layer_set_font(text_time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_BOLD_SUBSET_49));
-  text_layer_set_text_color(text_time_layer, TEXTCOLOR);
-  text_layer_set_background_color(text_time_layer, BGCOLOR);
+  text_layer_set_text_color(text_time_layer, GColorWhite);
+  
+  fill_in_personalized_text();
+  
   layer_add_child(window_layer, text_layer_get_layer(text_time_layer));
 
   // Line
@@ -512,7 +585,7 @@ void handle_init(void) {
   LineLayer = layer_create(line_frame);
   layer_set_update_proc(LineLayer, line_layer_update_callback);
   layer_add_child(window_layer, LineLayer);
-
+  
   tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
 
   //Bluetooth Logo Setup area
@@ -526,11 +599,9 @@ void handle_init(void) {
   bluetooth_connection_service_subscribe(&handle_bluetooth);
   handle_bluetooth(bluetooth_connection_service_peek());
 
-
   // Battery Text Setup
-  text_battery_layer = text_layer_create(GRect(85,2,55,30));
-  text_layer_set_text_color(text_battery_layer, TEXTCOLOR);
-  text_layer_set_background_color(text_battery_layer, BGCOLOR);
+  text_battery_layer = text_layer_create(GRect(85,2,55,26));
+  text_layer_set_text_color(text_battery_layer, GColorWhite);
   text_layer_set_font(text_battery_layer, fontHelvNewLight20);
   text_layer_set_text_alignment(text_battery_layer, GTextAlignmentRight);
 
@@ -540,6 +611,28 @@ void handle_init(void) {
 
   layer_add_child(window_layer, text_layer_get_layer(text_battery_layer));
 
+  #ifdef PBL_COLOR
+    if (strcmp(BGColorConfig, "0") == 0) {
+        window_set_background_color(window, GColorMidnightGreen);
+        text_layer_set_background_color(text_battery_layer,  GColorMidnightGreen);
+        text_layer_set_background_color(text_time_layer, GColorMidnightGreen);
+        text_layer_set_background_color(text_dayname_layer, GColorMidnightGreen);
+        text_layer_set_background_color(text_date_layer, GColorMidnightGreen);
+        text_layer_set_background_color(text_personalized_layer, GColorMidnightGreen);
+    }
+      
+    if (strcmp(BGColorConfig, "1") == 0) {
+        window_set_background_color(window, GColorDukeBlue);
+        text_layer_set_background_color(text_battery_layer,  GColorDukeBlue);
+        text_layer_set_background_color(text_time_layer, GColorDukeBlue);
+        text_layer_set_background_color(text_dayname_layer, GColorDukeBlue);
+        text_layer_set_background_color(text_date_layer, GColorDukeBlue);
+        text_layer_set_background_color(text_personalized_layer, GColorDukeBlue);
+    }  
+    #else
+      window_set_background_color(window, GColorBlack);
+  #endif
+    
   //app focus service subscribe
   app_focus_service_subscribe(&handle_appfocus);
 }
