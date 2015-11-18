@@ -258,36 +258,77 @@ void fill_in_personalized_text() {
 
   if (strlen(personalized_text) >  12) {       //Shouldn't happen, but error trapping...
       strncpy(personalized_text, "TooMuchData", sizeof(personalized_text));
-      text_personalized_layer = text_layer_create(GRect(1, 40, 144, 22));
+      #ifdef PBL_PLATFORM_CHALK
+          text_personalized_layer = text_layer_create(GRect(1, 40, 180, 22));
+      #else
+          text_personalized_layer = text_layer_create(GRect(1, 40, 144, 22)); 
+      #endif
+        
       text_layer_set_font(text_personalized_layer, fontMonaco19);
 
-    } else if (strlen(personalized_text) ==  0) {
+    } else if (strlen(personalized_text) ==  0)    { //Shouldn't happen, but error trapping...
       strncpy(personalized_text, "Enter Text", sizeof(personalized_text));
-      text_personalized_layer = text_layer_create(GRect(1, 40, 144, 24));
+      #ifdef PBL_PLATFORM_CHALK
+          text_personalized_layer = text_layer_create(GRect(1, 40, 180, 24));
+      #else
+          text_personalized_layer = text_layer_create(GRect(1, 40, 144, 24));
+      #endif 
+        
       text_layer_set_font(text_personalized_layer, fontMonaco19);
 
     } else if (strlen(personalized_text) ==  11) {
-      text_personalized_layer = text_layer_create(GRect(1, 40, 144, 29));
+      #ifdef PBL_PLATFORM_CHALK
+          text_personalized_layer = text_layer_create(GRect(1, 40, 180, 29));
+      #else
+          text_personalized_layer = text_layer_create(GRect(1, 40, 144, 29));
+      #endif
+        
       text_layer_set_font(text_personalized_layer, fontMonaco19);
 
     } else if (strlen(personalized_text) == 10) {
-      text_personalized_layer = text_layer_create(GRect(1,38, 144, 31));
+      #ifdef PBL_PLATFORM_CHALK
+          text_personalized_layer = text_layer_create(GRect(1, 38, 180, 31));
+      #else
+          text_personalized_layer = text_layer_create(GRect(1, 38, 144, 31));
+      #endif
+
       text_layer_set_font(text_personalized_layer, fontMonaco22);
 
     } else if (strlen(personalized_text) == 9)  {
-      text_personalized_layer = text_layer_create(GRect(1, 36, 144, 33));
+      #ifdef PBL_PLATFORM_CHALK
+          text_personalized_layer = text_layer_create(GRect(1, 36, 180, 33));
+      #else
+          text_personalized_layer = text_layer_create(GRect(1, 36, 144, 33));
+      #endif
+        
       text_layer_set_font(text_personalized_layer, fontMonaco24);
+    
 
     } else if (strlen(personalized_text) == 8)  {
-      text_personalized_layer = text_layer_create(GRect(1, 34, 144, 35));
+      #ifdef PBL_PLATFORM_CHALK
+          text_personalized_layer = text_layer_create(GRect(1, 34, 180, 35));      
+      #else
+          text_personalized_layer = text_layer_create(GRect(1, 34, 144, 35));      
+      #endif
+
       text_layer_set_font(text_personalized_layer, fontMonaco26);
 
     } else if (strlen(personalized_text) ==  7) {
-      text_personalized_layer = text_layer_create(GRect(1, 32, 144, 35));
+      #ifdef PBL_PLATFORM_CHALK
+          text_personalized_layer = text_layer_create(GRect(1, 32, 180, 35));
+      #else
+          text_personalized_layer = text_layer_create(GRect(1, 32, 144, 35));
+      #endif
+    
       text_layer_set_font(text_personalized_layer, fontMonaco30);
 
     } else  {  //6 or less
-      text_personalized_layer = text_layer_create(GRect(1, 25, 144, 44));
+      #ifdef PBL_PLATFORM_CHALK
+          text_personalized_layer = text_layer_create(GRect(1, 25, 180, 44));
+      #else
+          text_personalized_layer = text_layer_create(GRect(1, 25, 144, 44));
+      #endif
+    
       text_layer_set_font(text_personalized_layer, fontMonaco37);
   }
 
@@ -525,15 +566,26 @@ void handle_init(void) {
   // Open AppMessage
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
 
+  
   // Dayname
-  text_dayname_layer = text_layer_create(GRect(1, 64, 144, 168-64));
+  #ifdef PBL_PLATFORM_CHALK
+      text_dayname_layer = text_layer_create(GRect(1, 64, 180, 180-64));
+  #else  //Aplite or Basalt
+      text_dayname_layer = text_layer_create(GRect(1, 64, 144, 168-64));
+  #endif
+    
   text_layer_set_text_alignment(text_dayname_layer, GTextAlignmentCenter);
   text_layer_set_font(text_dayname_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   text_layer_set_text_color(text_dayname_layer, GColorWhite);     
   layer_add_child(window_layer, text_layer_get_layer(text_dayname_layer));
 
   // Date
-  text_date_layer = text_layer_create(GRect(8, 88, 144-8, 168-88));
+  #ifdef PBL_PLATFORM_CHALK
+      text_date_layer = text_layer_create(GRect(1, 88, 180, 180-88));
+  #else
+      text_date_layer = text_layer_create(GRect(1, 88, 144, 168-88));    
+  #endif
+    
   text_layer_set_text_alignment(text_date_layer, GTextAlignmentCenter);
   text_layer_set_font(text_date_layer, fonts_get_system_font(FONT_KEY_ROBOTO_CONDENSED_21));
   text_layer_set_text_color(text_date_layer, GColorWhite);
@@ -571,17 +623,31 @@ void handle_init(void) {
   } 
   
   // Time of Day
-  text_time_layer = text_layer_create(GRect(1, 116, 144, 168-116));
+  #ifdef PBL_PLATFORM_CHALK
+      text_time_layer = text_layer_create(GRect(1, 116, 180, 180-116));
+  #else //Aplite or Basalt
+      text_time_layer = text_layer_create(GRect(1, 116, 144, 168-116));
+  #endif
+    
   text_layer_set_text_alignment(text_time_layer, GTextAlignmentCenter);
-  text_layer_set_font(text_time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_BOLD_SUBSET_49));
+    #ifdef PBL_PLATFORM_CHALK
+        text_layer_set_font(text_time_layer, fonts_get_system_font(FONT_KEY_BITHAM_42_BOLD));
+    #else //Aplite or Basalt
+        text_layer_set_font(text_time_layer, fonts_get_system_font(FONT_KEY_ROBOTO_BOLD_SUBSET_49));
+    #endif  
+      
   text_layer_set_text_color(text_time_layer, GColorWhite);
-  
   fill_in_personalized_text();
   
   layer_add_child(window_layer, text_layer_get_layer(text_time_layer));
 
   // Line
-  GRect line_frame = GRect(22, 118, 104, 6);
+  #ifdef PBL_PLATFORM_CHALK
+      GRect line_frame = GRect(38, 118, 104, 6);
+  #else // Aplite or Basalt
+      GRect line_frame = GRect(22, 118, 104, 6);
+  #endif
+    
   LineLayer = layer_create(line_frame);
   layer_set_update_proc(LineLayer, line_layer_update_callback);
   layer_add_child(window_layer, LineLayer);
@@ -589,7 +655,12 @@ void handle_init(void) {
   tick_timer_service_subscribe(SECOND_UNIT, handle_tick);
 
   //Bluetooth Logo Setup area
-  GRect BTArea = GRect(1, 5, 20, 20);
+  #ifdef PBL_PLATFORM_CHALK
+      GRect BTArea = GRect(55, 5, 20, 20);
+  #else
+      GRect BTArea = GRect(1, 5, 20, 20);
+  #endif 
+    
   BTLayer = layer_create(BTArea);
 
   layer_add_child(window_layer, BTLayer);
@@ -600,7 +671,12 @@ void handle_init(void) {
   handle_bluetooth(bluetooth_connection_service_peek());
 
   // Battery Text Setup
-  text_battery_layer = text_layer_create(GRect(85,2,55,26));
+  #ifdef PBL_PLATFORM_CHALK
+      text_battery_layer = text_layer_create(GRect(80,2,55,26));
+  #else
+      text_battery_layer = text_layer_create(GRect(85,2,55,26));
+  #endif 
+    
   text_layer_set_text_color(text_battery_layer, GColorWhite);
   text_layer_set_font(text_battery_layer, fontHelvNewLight20);
   text_layer_set_text_alignment(text_battery_layer, GTextAlignmentRight);
