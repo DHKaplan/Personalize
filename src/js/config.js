@@ -111,7 +111,7 @@ module.exports = [
                         "description": "",
                         "attributes": {
                             "placeholder": "Enter Personalized Text",
-                             "limit": 11,
+                             "maxlength": 11,
 
                         }
                     }

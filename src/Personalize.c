@@ -286,8 +286,8 @@ void fill_in_personalized_text() {
         
       text_layer_set_font(text_personalized_layer, fontMonaco19);
 
-    } else if (strlen(PersistPersonalized_Text) ==  0)    { //Shouldn't happen, but error trapping...
-      strncpy(PersistPersonalized_Text, "Enter Text", sizeof(PersistPersonalized_Text));
+    } else if (strlen(PersistPersonalized_Text) ==  0)    { //Shouldn't happen, but let go by...
+      strncpy(PersistPersonalized_Text, "", sizeof(PersistPersonalized_Text));
       APP_LOG(APP_LOG_LEVEL_ERROR, "    In fill_in_personalized_text, Chars = 0 , %s", PersistPersonalized_Text);
       #ifdef PBL_PLATFORM_CHALK
           text_personalized_layer = text_layer_create(GRect(1, 40, 180, 24));
