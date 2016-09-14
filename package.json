@@ -1,7 +1,7 @@
 {
     "author": "DHK",
     "dependencies": {
-        "pebble-clay": "^1.0.1"
+        "pebble-clay": "^1.0.2"
     },
     "keywords": [],
     "name": "personalize",
@@ -69,12 +69,13 @@
         "targetPlatforms": [
             "aplite",
             "basalt",
-            "chalk"
+            "chalk",
+            "diorite"
         ],
         "uuid": "98139d10-3692-4187-b03e-fa498b00b364",
         "watchapp": {
             "watchface": true
         }
     },
-    "version": "4.0.0"
+    "version": "5.0.0"
 }
