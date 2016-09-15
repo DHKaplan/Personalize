@@ -130,7 +130,7 @@ module.exports = [
             },
             {
                 "type": "text",
-                "defaultValue": "Personalize By WA1OUI V4.0"
+                "defaultValue": "Personalize By WA1OUI V5.1"
             }
         ]
     }
