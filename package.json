@@ -23,9 +23,10 @@
         "resources": {
             "media": [
                 {
-                    "file": "images/menu_icon_Personalize-BW.png",
+                    "file": "images/Personalize_Menu_Icon_Color.png",
                     "menuIcon": true,
                     "name": "IMAGE_MENU_ICON",
+                    "targetPlatforms": null,
                     "type": "bitmap"
                 },
                 {
@@ -77,5 +78,5 @@
             "watchface": true
         }
     },
-    "version": "5.1.0"
+    "version": "5.2.0"
 }
